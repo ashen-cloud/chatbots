@@ -3,7 +3,6 @@ import re
 import tensorflow as tf
 import tensorflow_datasets as tfds
 from collections import Counter
-# from torchtext import vocab
 from torchtext.vocab import vocab
 from torchtext.data.utils import get_tokenizer
 from torch.nn.utils.rnn import pad_sequence
@@ -12,6 +11,16 @@ import torch
 
 MAX_SAMPLES = 50000
 MAX_LENGTH = 40
+
+unk_token = '<unk>'
+pad_token = '<PAD>'
+bos_token = '<BOS>'
+eos_token = '<EOS>'
+
+unk_token_ind = 0
+pad_token_ind = 1
+bos_token_ind = 2
+eos_token_ind = 3
 
 def create_dataloader():
     # TODO: remove tensorflow
@@ -31,11 +40,11 @@ def create_dataloader():
         counter.update(tokenizer(sent))
 
     voc = vocab(counter)
-    voc.insert_token(token='<unk>', index=0)
-    voc.set_default_index(index=0)
-    voc.insert_token(token='<PAD>', index=1)
-    voc.insert_token(token='<BOS>', index=2)
-    voc.insert_token(token='<EOS>', index=3)
+    voc.insert_token(token=unk_token, index=unk_token_ind)
+    voc.set_default_index(index=unk_token_ind)
+    voc.insert_token(token=pad_token, index=pad_token_ind)
+    voc.insert_token(token=bos_token, index=bos_token_ind)
+    voc.insert_token(token=eos_token, index=eos_token_ind)
 
     text_transform = lambda x: [voc['<BOS>']] + [voc[token] for token in tokenizer(x)] + [voc['<EOS>']]
 
@@ -52,7 +61,8 @@ def create_dataloader():
 
     print("Vocab len", len(voc))
 
-    dataloader = list(iter(DataLoader(list(zip(q_padded, a_padded)), batch_size=8, shuffle=False)))
+    dataloader = DataLoader(list(zip(q_padded, a_padded)), batch_size=8, shuffle=False)
+    # dataloader = list(iter(dl_inst))
 
     return dataloader, text_transform, voc
 

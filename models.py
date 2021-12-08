@@ -1,30 +1,46 @@
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
-import pytorch_lightning as pl
 
-# https://arxiv.org/pdf/1508.04025.pdf
+from preprocess import pad_token_ind
 
-class ModelV1(pl.LightningModule):
-    def __init__(self, input_size, hidden_size, num_layers=1, dropout=0):
+# todo: loss, architecture, refactor preprocessing? 
+
+# https://arxiv.org/pdf/1508.04025.pdf -- attention
+
+
+class ModelV1(torch.nn.Module):
+    def __init__(self, input_size, hidden_size=256, num_layers=1, dropout=0, vocab_len=0, vect_len=0):
         super().__init__()
+
+        self.input_size = hidden_size
         self.num_layers = num_layers
         self.hidden_size = hidden_size
-        self.input_size = hidden_size
+        self.dropout = dropout
 
-        self.gru = nn.GRU(input_size, hidden_size, num_layers, dropout, bidirectional=True)
+        self.embedding = nn.Embedding(vocab_len, vect_len, max_norm=True)
+
+        self.attn = nn.Linear(hidden_size, hidden_size)
+             
+        self.encoder = nn.Sequential(
+            nn.GRU(input_size, hidden_size, num_layers, dropout, bidirectional=True)
+        )
+
+        self.decoder = nn.Sequential(
+            nn.ReLU(),
+            nn.GRU(input_size, hidden_size, num_layers, dropout, bidirectional=True)
+        )
         
 
-    def forward(self, x):
-        pass
+    def forward(self, x, init_state=None):
+        embedded = self.embedding(x)
+        print('embedded', embedded)
 
-    def configure_optimizers(self):
-        optim = torch.optim.Adam(self.parameters(), lr=1e-3)
-        return optim
+        encoder_out = self.encoder(embedded.unsqueeze(1))
+        print('encoder_out', encoder_out)
 
-    def training_step(self, train_batch, batch_idx):
-        x, y = train_batch
+        decoder_out = self.decoder(encoder_out)
+        print('decoder_out', decoder_out)
 
-        loss = F.mse_loss(0, 0)
-
-        return loss
+        return out, hidden
 
