@@ -7,8 +7,6 @@ from preprocess import pad_token_ind
 
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
-# todo: loss, architecture, refactor preprocessing? 
-
 # https://arxiv.org/pdf/1508.04025.pdf -- attention
 
 
@@ -40,14 +38,11 @@ class ModelV1(nn.Module):
 
         x_embedded = self.dec_embedding(x)
         tf = random() > 0.5
-        print('x shape', x_embedded.shape)
-        print('emb shape', self.dec_embedding(y).squeeze(2).shape)
 
         decoder_out, _ = self.decoder(self.dec_embedding(y) if tf else x_embedded, encoder_state)
 
         dec_reshaped = decoder_out.reshape(x.shape[0], self.hidden_size * self.input_size)
 
-        print('dec out shape', dec_reshaped.shape)
         norm_dec_out = self.decoder_fc(dec_reshaped)
 
         return norm_dec_out, y
