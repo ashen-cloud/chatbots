@@ -61,7 +61,7 @@ def create_dataloader():
 
     print("Vocab len", len(voc))
 
-    dataloader = DataLoader(list(zip(q_padded, a_padded)), batch_size=8, shuffle=False)
+    dataloader = DataLoader(list(zip(q_padded, a_padded)), batch_size=4, shuffle=False)
     # dataloader = list(iter(dl_inst))
 
     return dataloader, text_transform, voc
