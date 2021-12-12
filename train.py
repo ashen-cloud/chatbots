@@ -43,4 +43,4 @@ for epoch in range(EPOCHS):
 
     print('epoch', epoch, 'loss', running_loss / len(dataloader))
 
-torch.save(model.state_dict(), './trained_model')
+torch.save(model, './trained_model')
