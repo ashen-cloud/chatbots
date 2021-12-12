@@ -33,13 +33,13 @@ class ModelV1(nn.Module):
         self.decoder_fc = nn.Linear(input_size * hidden_size, out_dim)
 
 
-    def forward(self, x, y):
+    def forward(self, x, y=None):
         _, encoder_state = self.encoder(x)
 
         x_embedded = self.dec_embedding(x)
         tf = random() > 0.5
 
-        decoder_out, _ = self.decoder(self.dec_embedding(y) if tf else x_embedded, encoder_state)
+        decoder_out, _ = self.decoder(self.dec_embedding(y) if tf and y != None else x_embedded, encoder_state)
 
         dec_reshaped = decoder_out.reshape(x.shape[0], self.hidden_size * self.input_size)
 

@@ -1,7 +1,7 @@
 #!/opt/homebrew/bin/python3
 
 from models import ModelV1
-from preprocess import create_dataloader
+from preprocess import create_dataloader, device
 
 from tqdm import tqdm
 
@@ -10,7 +10,6 @@ import torch.nn as nn
 
 # todo: save/load, wrapper, improve nn arch (use transformer or conv)
 
-device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print('device', device)
 
 dataloader, text_transform, voc = create_dataloader()

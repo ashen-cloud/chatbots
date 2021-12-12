@@ -9,6 +9,8 @@ from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 import torch
 
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+
 MAX_SAMPLES = 50000
 MAX_LENGTH = 40
 
@@ -21,6 +23,8 @@ unk_token_ind = 0
 pad_token_ind = 1
 bos_token_ind = 2
 eos_token_ind = 3
+
+text_transform = lambda x, voc, tokenizer: [voc['<BOS>']] + [voc[token] for token in tokenizer(x)] + [voc['<EOS>']]
 
 def create_dataloader():
     # TODO: remove tensorflow
@@ -46,12 +50,10 @@ def create_dataloader():
     voc.insert_token(token=bos_token, index=bos_token_ind)
     voc.insert_token(token=eos_token, index=eos_token_ind)
 
-    text_transform = lambda x: [voc['<BOS>']] + [voc[token] for token in tokenizer(x)] + [voc['<EOS>']]
+    print(text_transform(questions[0], voc, tokenizer))
 
-    print(text_transform(questions[0]))
-
-    q_tokenized = [text_transform(t) for t in questions]
-    a_tokenized = [text_transform(t) for t in answers]
+    q_tokenized = [text_transform(t, voc, tokenizer) for t in questions]
+    a_tokenized = [text_transform(t, voc, tokenizer) for t in answers]
 
     q_padded = tf.keras.preprocessing.sequence.pad_sequences(
         q_tokenized, maxlen=MAX_LENGTH, padding='post', value=1.0)
@@ -63,6 +65,9 @@ def create_dataloader():
 
     dataloader = DataLoader(list(zip(q_padded, a_padded)), batch_size=4, shuffle=False)
     # dataloader = list(iter(dl_inst))
+
+    print(voc)
+    torch.save(voc, 'vocab')
 
     return dataloader, text_transform, voc
 

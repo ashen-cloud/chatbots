@@ -1,0 +1,24 @@
+#!/opt/homebrew/bin/python3
+
+import torch
+from torchtext.data.utils import get_tokenizer
+import tensorflow as tf # todo: get rid of this
+from preprocess import text_transform, MAX_LENGTH
+
+model = torch.load('trained_model', map_location=torch.device('cuda:0' if torch.cuda.is_available() else'cpu'))
+
+voc = torch.load('vocab')
+
+print('accepting input')
+query = input()
+
+q_tokenized = text_transform(query, voc, get_tokenizer('basic_english'))
+
+print('tokenzied', q_tokenized)
+q_padded = tf.keras.preprocessing.sequence.pad_sequences([q_tokenized], maxlen=MAX_LENGTH, padding='post', value=1.0)
+
+infer = model(q_padded)
+
+print(q_padded)
+
+
